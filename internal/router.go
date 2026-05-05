@@ -12,11 +12,12 @@ import (
 )
 
 type Server struct {
-	log            *zap.SugaredLogger
-	packHandler    *handler.PackHandler
-	orderHandler   *handler.OrderHandler
-	packService    service.PackService
-	packRepository repository.Repository
+	log             *zap.SugaredLogger
+	packHandler     *handler.PackHandler
+	orderHandler    *handler.OrderHandler
+	templateHandler *handler.TemplateHandler
+	packService     service.PackService
+	packRepository  repository.Repository
 }
 
 func NewServer(log *zap.SugaredLogger, pool *pgxpool.Pool) *Server {
@@ -24,13 +25,18 @@ func NewServer(log *zap.SugaredLogger, pool *pgxpool.Pool) *Server {
 	packService := service.NewPackSizeService(packRepository, log)
 	packHandler := handler.NewPackHandler(log, packService)
 	orderHandler := handler.NewOrderHandler(log, packService)
+	templateHandler, err := handler.NewTemplateHandler(log, packService)
+	if err != nil {
+		log.Fatalw("parse templates failed", "error", err)
+	}
 
 	return &Server{
-		log:            log,
-		packHandler:    packHandler,
-		orderHandler:   orderHandler,
-		packService:    packService,
-		packRepository: packRepository,
+		log:             log,
+		packHandler:     packHandler,
+		orderHandler:    orderHandler,
+		templateHandler: templateHandler,
+		packService:     packService,
+		packRepository:  packRepository,
 	}
 }
 
@@ -40,6 +46,7 @@ func (s *Server) SetupRoutes() *echo.Echo {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 	e.Pre(middleware.RemoveTrailingSlash())
+	e.GET("/", s.templateHandler.RenderUI)
 
 	api := e.Group("/api")
 

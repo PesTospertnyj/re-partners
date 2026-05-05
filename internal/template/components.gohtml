@@ -1,0 +1,115 @@
+{{define "scripts"}}
+<script>
+const packStatusEl = document.getElementById("packStatus");
+const calcStatusEl = document.getElementById("calcStatus");
+const resultSummaryEl = document.getElementById("resultSummary");
+const resultTableEl = document.getElementById("resultTable");
+const resultBodyEl = document.getElementById("resultBody");
+const packsTableBodyEl = document.getElementById("packsTableBody");
+
+function setStatus(target, msg, isError) {
+    target.textContent = msg;
+    target.classList.toggle("error", !!isError);
+}
+
+function renderPacks(packs) {
+    if (!Array.isArray(packs) || packs.length === 0) {
+        packsTableBodyEl.innerHTML = '<tr><td colspan="3">No pack sizes yet</td></tr>';
+        return;
+    }
+
+    packsTableBodyEl.innerHTML = packs.map((pack) => `
+        <tr data-pack-id="${pack.id}">
+            <td>${pack.id}</td>
+            <td>${pack.size}</td>
+            <td><button type="button" class="delete" onclick="deletePack(${pack.id})">Delete</button></td>
+        </tr>
+    `).join("");
+}
+
+async function reloadPacks() {
+    const res = await fetch("/api/packs");
+    if (!res.ok) {
+        throw new Error("failed to load packs");
+    }
+    const packs = await res.json();
+    renderPacks(packs);
+}
+
+async function deletePack(id) {
+    try {
+        const res = await fetch(`/api/packs/${id}`, { method: "DELETE" });
+        if (!res.ok) {
+            throw new Error(await res.text());
+        }
+        await reloadPacks();
+        setStatus(packStatusEl, "Pack deleted", false);
+    } catch (err) {
+        setStatus(packStatusEl, `Delete failed: ${err.message}`, true);
+    }
+}
+
+document.getElementById("addPackForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const input = document.getElementById("newPackSize");
+    const size = Number(input.value);
+    if (!size || size <= 0) {
+        setStatus(packStatusEl, "Size must be positive number", true);
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/packs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ size })
+        });
+        if (!res.ok) {
+            throw new Error(await res.text());
+        }
+        input.value = "";
+        await reloadPacks();
+        setStatus(packStatusEl, "Pack added", false);
+    } catch (err) {
+        setStatus(packStatusEl, `Add failed: ${err.message}`, true);
+    }
+});
+
+document.getElementById("calculateForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const itemsOrdered = Number(document.getElementById("itemsOrdered").value);
+    if (!itemsOrdered || itemsOrdered <= 0) {
+        setStatus(calcStatusEl, "Items count must be positive number", true);
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/orders/calculate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items_ordered: itemsOrdered })
+        });
+        if (!res.ok) {
+            throw new Error(await res.text());
+        }
+        const result = await res.json();
+        const packs = Array.isArray(result.packs) ? result.packs : [];
+        let totalPacks = 0;
+        resultBodyEl.innerHTML = packs.map((pack) => {
+            totalPacks += Number(pack.quantity) || 0;
+            const items = (Number(pack.size) || 0) * (Number(pack.quantity) || 0);
+            return `<tr><td>${pack.size}</td><td>${pack.quantity}</td><td>${items}</td></tr>`;
+        }).join("");
+
+        resultSummaryEl.textContent =
+            `Desired: ${result.items_ordered}, delivered: ${result.total_items}, total packs: ${totalPacks}`;
+        resultTableEl.style.display = packs.length ? "table" : "none";
+        setStatus(calcStatusEl, "Calculation done", false);
+    } catch (err) {
+        resultTableEl.style.display = "none";
+        resultSummaryEl.textContent = "";
+        setStatus(calcStatusEl, `Calculation failed: ${err.message}`, true);
+    }
+});
+</script>
+{{end}}

@@ -1,0 +1,21 @@
+{{define "calculatorSection"}}
+<section class="card">
+    <h2>Order Calculator</h2>
+    <form id="calculateForm" class="inline">
+        <input id="itemsOrdered" type="number" min="1" required placeholder="Desired items count">
+        <button type="submit">Calculate</button>
+    </form>
+    <div id="calcStatus" class="status"></div>
+    <div id="resultSummary" class="result-summary"></div>
+    <table id="resultTable" style="display:none;">
+        <thead>
+        <tr>
+            <th>Pack Size</th>
+            <th>Quantity</th>
+            <th>Items</th>
+        </tr>
+        </thead>
+        <tbody id="resultBody"></tbody>
+    </table>
+</section>
+{{end}}

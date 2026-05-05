@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 	"net/http"
@@ -41,7 +40,11 @@ func (h *OrderHandler) Calculate(c echo.Context) error {
 	minTotalItems := minimumTotalItems(calculateDto.ItemsOrdered, ascSizes)
 	minPacks := minimumPackBreakdown(minTotalItems, ascSizes)
 
-	return c.JSON(http.StatusOK, fmt.Sprintf("minTotalItems %d, minPacks %v+", minTotalItems, minPacks))
+	return c.JSON(http.StatusOK, dto.CalculateResult{
+		ItemsOrdered: calculateDto.ItemsOrdered,
+		TotalItems:   minTotalItems,
+		Packs:        minPacks,
+	})
 }
 
 func minimumTotalItems(quantity int, sizesAsc []int) int {

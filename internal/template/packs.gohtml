@@ -1,0 +1,35 @@
+{{define "packsSection"}}
+<section class="card">
+    <h2>Pack Sizes</h2>
+    <form id="addPackForm" class="inline">
+        <input id="newPackSize" type="number" min="1" required placeholder="Pack size">
+        <button type="submit">Add Pack Size</button>
+    </form>
+    <div id="packStatus" class="status"></div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Size</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="packsTableBody">
+        {{range .Packs}}
+        <tr data-pack-id="{{.ID}}">
+            <td>{{.ID}}</td>
+            <td>{{.Size}}</td>
+            <td>
+                <button type="button" class="delete" onclick="deletePack({{.ID}})">Delete</button>
+            </td>
+        </tr>
+        {{else}}
+        <tr>
+            <td colspan="3">No pack sizes yet</td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
+</section>
+{{end}}
