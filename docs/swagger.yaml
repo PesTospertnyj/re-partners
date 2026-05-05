@@ -1,0 +1,149 @@
+basePath: /api
+definitions:
+  dto.AddPackSize:
+    properties:
+      size:
+        type: integer
+    type: object
+  dto.Calculate:
+    properties:
+      items_ordered:
+        type: integer
+    type: object
+  dto.CalculateResult:
+    properties:
+      items_ordered:
+        type: integer
+      packs:
+        items:
+          $ref: '#/definitions/dto.Pack'
+        type: array
+      total_items:
+        type: integer
+    type: object
+  dto.ErrorResponse:
+    properties:
+      message: {}
+    type: object
+  dto.Pack:
+    properties:
+      quantity:
+        type: integer
+      size:
+        type: integer
+    type: object
+  dto.PackSize:
+    properties:
+      id:
+        type: integer
+      size:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: REST API for pack sizes and order pack calculation.
+  title: RE Partners API
+  version: "1.0"
+paths:
+  /orders/calculate:
+    post:
+      consumes:
+      - application/json
+      description: Returns minimum total items and pack breakdown for requested order
+        size.
+      parameters:
+      - description: Order calculation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Calculate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CalculateResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Calculate order packs
+      tags:
+      - orders
+  /packs:
+    get:
+      description: Returns pack sizes ordered ascending.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PackSize'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: List pack sizes
+      tags:
+      - packs
+    post:
+      consumes:
+      - application/json
+      description: Creates a pack size used for order calculations.
+      parameters:
+      - description: Pack size request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddPackSize'
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Add pack size
+      tags:
+      - packs
+  /packs/{id}:
+    delete:
+      description: Deletes pack size by identifier.
+      parameters:
+      - description: Pack size id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete pack size
+      tags:
+      - packs
+schemes:
+- http
+swagger: "2.0"

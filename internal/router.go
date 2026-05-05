@@ -1,14 +1,17 @@
 package internal
 
 import (
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"go.uber.org/zap"
+	echoSwagger "github.com/swaggo/echo-swagger"
+	_ "re-partners/docs"
 	"re-partners/internal/handler"
 	internalmiddleware "re-partners/internal/middleware"
 	"re-partners/internal/repository"
 	"re-partners/internal/service"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"go.uber.org/zap"
 )
 
 type Server struct {
@@ -40,15 +43,24 @@ func NewServer(log *zap.SugaredLogger, pool *pgxpool.Pool) *Server {
 	}
 }
 
+//	@title			RE Partners API
+//	@version		1.0
+//	@description	REST API for pack sizes and order pack calculation.
+//	@schemes		http
+
+// @host		localhost:8080
+// @BasePath	/api
 func (s *Server) SetupRoutes() *echo.Echo {
 	e := echo.New()
 	e.Use(internalmiddleware.ZapRequestLogger(s.log))
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 	e.Pre(middleware.RemoveTrailingSlash())
+
 	e.GET("/", s.templateHandler.RenderUI)
 
 	api := e.Group("/api")
+	api.GET("*", echoSwagger.WrapHandler)
 
 	pack := api.Group("/packs")
 	pack.GET("", s.packHandler.GetPackSizes)

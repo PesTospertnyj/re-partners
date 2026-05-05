@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"errors"
-	"go.uber.org/zap"
 	"net/http"
 	"os"
 	"path/filepath"
 	"re-partners/internal"
 	"re-partners/internal/config"
+
+	"go.uber.org/zap"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"

@@ -2,10 +2,11 @@ package service
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"re-partners/internal/converter"
 	"re-partners/internal/dto"
 	"re-partners/internal/repository"
+
+	"go.uber.org/zap"
 )
 
 type packSizeService struct {

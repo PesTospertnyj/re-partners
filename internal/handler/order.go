@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"github.com/labstack/echo/v4"
-	"go.uber.org/zap"
 	"net/http"
 	"re-partners/internal/dto"
 	"re-partners/internal/service"
+
+	"github.com/labstack/echo/v4"
+	"go.uber.org/zap"
 )
 
 type OrderHandler struct {
@@ -20,6 +21,18 @@ func NewOrderHandler(log *zap.SugaredLogger, packService service.PackService) *O
 	}
 }
 
+// Calculate calculates minimum packs for requested quantity.
+//
+//	@Summary		Calculate order packs
+//	@Description	Returns minimum total items and pack breakdown for requested order size.
+//	@Tags			orders
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		dto.Calculate	true	"Order calculation request"
+//	@Success		200		{object}	dto.CalculateResult
+//	@Failure		400		{object}	dto.ErrorResponse
+//	@Failure		500		{object}	dto.ErrorResponse
+//	@Router			/orders/calculate [post]
 func (h *OrderHandler) Calculate(c echo.Context) error {
 	calculateDto := dto.Calculate{}
 	if err := c.Bind(&calculateDto); err != nil {
