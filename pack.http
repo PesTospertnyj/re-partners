@@ -1,0 +1,21 @@
+### List pack sizes
+GET http://localhost:8080/api/packs
+
+### Add pack size
+POST http://localhost:8080/api/packs/
+Content-Type: application/json
+
+{
+    "size": 10000
+}
+
+### Delete pack size
+DELETE http://localhost:8080/api/packs/10
+
+### Calculate order
+POST http://localhost:8080/api/orders/calculate
+Content-Type: application/json
+
+{
+  "items_ordered": 501
+}
