@@ -1,12 +1,13 @@
 package internal
 
 import (
-	echoSwagger "github.com/swaggo/echo-swagger"
 	_ "re-partners/docs"
 	"re-partners/internal/handler"
 	internalmiddleware "re-partners/internal/middleware"
 	"re-partners/internal/repository"
 	"re-partners/internal/service"
+
+	echoSwagger "github.com/swaggo/echo-swagger"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
